@@ -41,7 +41,7 @@ char	*read_line(int fd, char *rest)
 	return (rest);
 }
 
-char	*getting_line(char **rest)
+char	*ft_get_line(char **rest)
 {
 	char	*line;
 	int		new_index;
@@ -52,11 +52,7 @@ char	*getting_line(char **rest)
 		return (ft_strdup(*rest));
 	line = malloc(new_index + 2);
 	if (!line)
-	{
-		free(*rest);
-		*rest = NULL;
-		return (NULL);
-	}
+		return (free(*rest), *rest = NULL, NULL);
 	i = 0;
 	while (i <= new_index)
 	{
@@ -67,25 +63,17 @@ char	*getting_line(char **rest)
 	return (line);
 }
 
-char	*update_rest(char **rest)
+char	*ft_get_rest(char **rest)
 {
 	int		new_index;
 	char	*new_rest;
 
 	new_index = ft_strchr(*rest, '\n');
 	if (new_index == -1)
-	{
-		free(*rest);
-		*rest = NULL;
-		return (NULL);
-	}
+		return (free(*rest), *rest = NULL, NULL);
 	new_rest = ft_strdup((*rest + new_index + 1));
 	if (!new_rest)
-	{
-		free(*rest);
-		*rest = NULL;
-		return (NULL);
-	}
+		return (free(*rest), *rest = NULL, NULL);
 	free(*rest);
 	*rest = NULL;
 	return (new_rest);
@@ -101,7 +89,7 @@ char	*get_next_line(int fd)
 	rest[fd] = read_line(fd, rest[fd]);
 	if (!rest[fd] || *rest[fd] == '\0')
 		return (free(rest[fd]), rest[fd] = NULL, NULL);
-	line = getting_line(&rest[fd]);
-	rest[fd] = update_rest(&rest[fd]);
+	line = ft_get_line(&rest[fd]);
+	rest[fd] = ft_get_rest(&rest[fd]);
 	return (line);
 }
