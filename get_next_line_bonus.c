@@ -3,93 +3,91 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ael-majd <ael-majd@student.42.fr>          +#+  +:+       +#+        */
+/*   By: szemmour <szemmour@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/25 09:56:28 by ael-majd          #+#    #+#             */
-/*   Updated: 2024/11/26 13:51:06 by ael-majd         ###   ########.fr       */
+/*   Created: 2024/12/07 10:05:50 by szemmour          #+#    #+#             */
+/*   Updated: 2024/12/07 10:44:29 by szemmour         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line_bonus.h"
 
-char	*read_line(int fd, char *rest)
+char	*read_line(int fd, char *line)
 {
 	int		byte_read;
 	char	*buffer;
-	char	*temp;
+	char	*tmp;
 
 	buffer = malloc(BUFFER_SIZE + 1);
 	if (!buffer)
-		return (free(rest), NULL);
-	byte_read = 1;
-	while (byte_read)
+		return (NULL);
+	byte_read = read(fd, buffer, BUFFER_SIZE);
+	while (byte_read > 0)
 	{
-		byte_read = read(fd, buffer, BUFFER_SIZE);
-		if (byte_read < 0)
-			return (free(buffer), NULL);
 		buffer[byte_read] = '\0';
-		temp = rest;
-		rest = ft_strjoin(rest, buffer);
-		free(temp);
-		if (!rest)
+		tmp = line;
+		line = ft_strjoin(tmp, buffer);
+		free(tmp);
+		if (!line)
 			return (free(buffer), NULL);
-		temp = NULL;
-		if (ft_strchr(rest, '\n') >= 0)
+		if (ft_strchr(buffer, '\n'))
 			break ;
+		byte_read = read(fd, buffer, BUFFER_SIZE);
 	}
 	free(buffer);
-	return (rest);
-}
-
-char	*ft_get_line(char **rest)
-{
-	char	*line;
-	int		new_index;
-	int		i;
-
-	new_index = ft_strchr(*rest, '\n');
-	if (new_index < 0)
-		return (ft_strdup(*rest));
-	line = malloc(new_index + 2);
-	if (!line)
-		return (free(*rest), *rest = NULL, NULL);
-	i = 0;
-	while (i <= new_index)
-	{
-		line[i] = (*rest)[i];
-		i++;
-	}
-	line[i] = '\0';
 	return (line);
 }
 
-char	*ft_get_rest(char **rest)
+char	*get_left_str(char *line)
 {
-	int		new_index;
-	char	*new_rest;
+	char	*left_str;
+	char	*newline;
 
-	new_index = ft_strchr(*rest, '\n');
-	if (new_index == -1)
-		return (free(*rest), *rest = NULL, NULL);
-	new_rest = ft_strdup((*rest + new_index + 1));
-	if (!new_rest)
-		return (free(*rest), *rest = NULL, NULL);
-	free(*rest);
-	*rest = NULL;
-	return (new_rest);
+	if (!line)
+		return (NULL);
+	newline = ft_strchr(line, '\n');
+	if (!newline)
+		return (NULL);
+	left_str = ft_strdup(newline + 1);
+	return (left_str);
+}
+
+char	*ft_get_line(char *line)
+{
+	char	*result;
+	char	*newline;
+	size_t	len;
+
+	if (!line)
+		return (NULL);
+	newline = ft_strchr(line, '\n');
+	if (newline)
+		len = newline - line + 1;
+	else
+		len = ft_strlen(line);
+	result = malloc(len + 1);
+	if (!result)
+		return (NULL);
+	ft_strlcpy(result, line, len + 1);
+	return (result);
 }
 
 char	*get_next_line(int fd)
 {
-	static char	*rest[10240];
+	static char	*left_str[OPEN_MAX];
 	char		*line;
+	char		*result;
 
-	if (fd < 0 || read(fd, 0, 0) < 0 || BUFFER_SIZE <= 0)
-		return (free(rest[fd]), rest[fd] = NULL, NULL);
-	rest[fd] = read_line(fd, rest[fd]);
-	if (!rest[fd] || *rest[fd] == '\0')
-		return (free(rest[fd]), rest[fd] = NULL, NULL);
-	line = ft_get_line(&rest[fd]);
-	rest[fd] = ft_get_rest(&rest[fd]);
-	return (line);
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+		return (free(left_str[fd]), left_str[fd] = NULL, NULL);
+	line = read_line(fd, left_str[fd]);
+	left_str[fd] = NULL;
+	if (!line || *line == '\0')
+		return (free(line), NULL);
+	result = ft_get_line(line);
+	left_str[fd] = get_left_str(line);
+	if (!result)
+		return (free(left_str[fd]), free(line), left_str[fd] = NULL, NULL);
+	free(line);
+	return (result);
 }
