@@ -8,7 +8,7 @@ This project taught me how to read from a file descriptor and use static variabl
 - [References](https://github.com/jotavare/42-resources#01-get_next_line) `GitHub`
 
 ## Why I get only 112 in this Project
-The main problem I faced was in the bonus part. The issue was that I freed the `left_str[fd]`, but what if `fd <= -1`? In that case, the program would cause a segmentation fault.  
+The main problem I faced was in the bonus part. The issue was that I freed the `left_str[fd]`, but what if `fd < 0`? In that case, the program would cause a segmentation fault.  
 
 To fix this and get 125 points, you need to check if `fd < 0` and `return NULL` without freeing `left_str`.  
 

@@ -6,7 +6,7 @@
 /*   By: szemmour <szemmour@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/07 10:05:50 by szemmour          #+#    #+#             */
-/*   Updated: 2024/12/07 10:44:29 by szemmour         ###   ########.fr       */
+/*   Updated: 2024/12/29 15:57:22 by szemmour         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,9 @@ char	*get_next_line(int fd)
 	char		*line;
 	char		*result;
 
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+	if(fd < 0)
+		return (NULL);
+	if (BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
 		return (free(left_str[fd]), left_str[fd] = NULL, NULL);
 	line = read_line(fd, left_str[fd]);
 	left_str[fd] = NULL;
